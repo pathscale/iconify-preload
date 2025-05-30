@@ -1,6 +1,6 @@
 {
 	"name": "rsbuild-plugin-iconify",
-	"version": "1.0.0",
+	"version": "1.0.1",
 	"description": "RSBuild plugin for optimized Iconify SVG icons compilation",
 	"main": "dist/index.js",
 	"types": "dist/index.d.ts",
