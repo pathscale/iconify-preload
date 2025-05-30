@@ -1,6 +1,7 @@
 interface IconifyPluginOptions {
     targetDir?: string;
     includeSets?: string[];
+    forceIncludeSets?: boolean;
     maxIconsPerSet?: number;
     maxTotalIcons?: number;
     compress?: boolean;

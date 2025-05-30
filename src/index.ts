@@ -9,6 +9,7 @@ import { optimizeSVG } from './utils/optimize';
 interface IconifyPluginOptions {
 	targetDir?: string;
 	includeSets?: string[];
+	forceIncludeSets?: boolean;
 	maxIconsPerSet?: number;
 	maxTotalIcons?: number;
 	compress?: boolean;
@@ -18,6 +19,7 @@ export const pluginIconify = (options: IconifyPluginOptions = {}) => {
 	const {
 		targetDir = 'src/styles/icons',
 		includeSets = ['mdi-light', 'material-symbols'],
+		forceIncludeSets = false,
 		maxIconsPerSet = 200,
 		maxTotalIcons = 1000,
 		compress = true,
@@ -73,8 +75,26 @@ export const pluginIconify = (options: IconifyPluginOptions = {}) => {
   background-size: 100% 100%;
 }
 `;
-				const usedIcons = findUsedIcons();
+				const usedIcons = findUsedIcons(targetDir);
 				console.log(`[iconify] Found ${usedIcons.size} unique icons in code`);
+
+				const usedSets = new Map<string, string[]>();
+				for (const iconName of usedIcons) {
+					const match = iconName.match(/icon-\[([\w-]+)--([\w-]+)\]/);
+					if (match) {
+						const setName = match[1];
+						const icon = match[2];
+						if (!usedSets.has(setName)) {
+							usedSets.set(setName, []);
+						}
+						usedSets.get(setName)?.push(icon);
+					}
+				}
+
+				console.log(`[iconify] Used icon sets: ${Array.from(usedSets.keys()).join(', ')}`);
+				for (const [setName, icons] of usedSets.entries()) {
+					console.log(`[iconify] Set ${setName} uses ${icons.length} icons`);
+				}
 
 				const iconSets = await lookupCollections();
 				const prefixes = Object.keys(iconSets);
@@ -85,9 +105,11 @@ export const pluginIconify = (options: IconifyPluginOptions = {}) => {
 
 				for (const iconSet of prefixes) {
 					try {
-						const includeFullSet = includeSets.includes(iconSet);
+						const includeFullSet = forceIncludeSets && includeSets.includes(iconSet);
 
-						if (!includeFullSet && !hasIconsWithPrefix(usedIcons, iconSet)) {
+						const hasUsedIcons = hasIconsWithPrefix(usedIcons, iconSet);
+
+						if (!includeFullSet && !hasUsedIcons) {
 							continue;
 						}
 
@@ -109,11 +131,7 @@ export const pluginIconify = (options: IconifyPluginOptions = {}) => {
 							const fullIconName = `${iconSet}--${iconName}`;
 							const cssIconName = `icon-[${iconSet}--${iconName}]`;
 
-							if (
-								!includeFullSet &&
-								!usedIcons.has(cssIconName) &&
-								!usedIcons.has(fullIconName)
-							) {
+							if (!includeFullSet && !usedIcons.has(cssIconName) && !usedIcons.has(fullIconName)) {
 								continue;
 							}
 
