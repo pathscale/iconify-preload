@@ -1,10 +1,12 @@
 import { exec } from 'node:child_process';
 import fs from 'node:fs';
+import { resolveTaskRunnerCommand } from './resolve-task-runner-command';
 
 export function compressCSS(inputFile: string, outputFile: string): Promise<void> {
-	return new Promise((resolve, reject) => {
+	return new Promise(async (resolve, reject) => {
+		const taskRunner = await resolveTaskRunnerCommand();
 		exec(
-			`npx postcss ${inputFile} --use cssnano --no-map -o ${outputFile}`,
+			`${taskRunner} postcss ${inputFile} --use cssnano --no-map -o ${outputFile}`,
 			(error, stdout, stderr) => {
 				if (error) {
 					console.error(`[iconify] Error compressing CSS: ${error.message}`);
