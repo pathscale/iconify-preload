@@ -1,7 +1,7 @@
-import { locate, lookupCollections } from "@iconify/json";
-import { getIconData, iconToHTML, iconToSVG } from "@iconify/utils";
 import fs from "node:fs";
 import path from "node:path";
+import { locate, lookupCollections } from "@iconify/json";
+import { getIconData, iconToHTML, iconToSVG } from "@iconify/utils";
 import { compressCSS } from "./utils/compress";
 import { findUsedIcons, hasIconsWithPrefix } from "./utils/find";
 import { optimizeSVG } from "./utils/optimize";

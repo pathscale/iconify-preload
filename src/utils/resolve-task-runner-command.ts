@@ -1,6 +1,5 @@
 import { exec } from "node:child_process";
 import { promisify } from "node:util";
-import { platform } from "node:os";
 
 type RuntimePlatformName = "bun" | "deno" | "node";
 
