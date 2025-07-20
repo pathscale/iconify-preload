@@ -1,10 +1,12 @@
-import { locate, lookupCollections } from '@iconify/json';
-import { getIconData, iconToHTML, iconToSVG } from '@iconify/utils';
-import fs from 'node:fs';
-import path from 'node:path';
-import { compressCSS } from './utils/compress';
-import { findUsedIcons, hasIconsWithPrefix } from './utils/find';
-import { optimizeSVG } from './utils/optimize';
+import fs from "node:fs";
+import path from "node:path";
+import { locate, lookupCollections } from "@iconify/json";
+import { getIconData, iconToHTML, iconToSVG } from "@iconify/utils";
+import type { RsbuildPluginAPI } from "@rsbuild/core";
+import type { NarrowedRspackConfig } from "@rsbuild/core/dist-types/types";
+import { compressCSS } from "./utils/compress";
+import { findUsedIcons, hasIconsWithPrefix } from "./utils/find";
+import { optimizeSVG } from "./utils/optimize";
 
 interface IconifyPluginOptions {
 	targetDir?: string;
@@ -17,8 +19,8 @@ interface IconifyPluginOptions {
 
 export const pluginIconify = (options: IconifyPluginOptions = {}) => {
 	const {
-		targetDir = 'src/styles/icons',
-		includeSets = ['mdi-light', 'material-symbols'],
+		targetDir = "src/styles/icons",
+		includeSets = ["mdi-light", "material-symbols"],
 		forceIncludeSets = false,
 		maxIconsPerSet = 200,
 		maxTotalIcons = 1000,
@@ -26,29 +28,33 @@ export const pluginIconify = (options: IconifyPluginOptions = {}) => {
 	} = options;
 
 	return {
-		name: 'rsbuild-plugin-iconify',
+		name: "rsbuild-plugin-iconify",
 
-		setup(api: any) {
+		setup(api: RsbuildPluginAPI) {
 			if (!fs.existsSync(targetDir)) {
 				fs.mkdirSync(targetDir, { recursive: true });
 			}
 
 			api.onBeforeBuild(async () => {
-				console.log('[iconify] Starting icon generation...');
+				console.log("[iconify] Starting icon generation...");
 				await generateIcons();
 			});
 
-			api.modifyRspackConfig((config: any) => {
-				if (fs.existsSync(path.join(targetDir, 'generated-icons.css'))) {
+			api.modifyRspackConfig((config: NarrowedRspackConfig) => {
+				if (fs.existsSync(path.join(targetDir, "generated-icons.css"))) {
 					if (!config.entry) {
 						config.entry = {};
 					}
 
-					const cssFile = path.resolve(process.cwd(), targetDir, 'generated-icons.css');
-					if (!fs.existsSync('dist/styles/icons')) {
-						fs.mkdirSync('dist/styles/icons', { recursive: true });
+					const cssFile = path.resolve(
+						process.cwd(),
+						targetDir,
+						"generated-icons.css",
+					);
+					if (!fs.existsSync("dist/styles/icons")) {
+						fs.mkdirSync("dist/styles/icons", { recursive: true });
 					}
-					fs.copyFileSync(cssFile, 'dist/styles/icons/generated-icons.css');
+					fs.copyFileSync(cssFile, "dist/styles/icons/generated-icons.css");
 				}
 
 				return config;
@@ -91,21 +97,26 @@ export const pluginIconify = (options: IconifyPluginOptions = {}) => {
 					}
 				}
 
-				console.log(`[iconify] Used icon sets: ${Array.from(usedSets.keys()).join(', ')}`);
+				console.log(
+					`[iconify] Used icon sets: ${Array.from(usedSets.keys()).join(", ")}`,
+				);
 				for (const [setName, icons] of usedSets.entries()) {
 					console.log(`[iconify] Set ${setName} uses ${icons.length} icons`);
 				}
 
 				const iconSets = await lookupCollections();
 				const prefixes = Object.keys(iconSets);
-				console.log(`[iconify] Found ${prefixes.length} icon sets in @iconify/json`);
+				console.log(
+					`[iconify] Found ${prefixes.length} icon sets in @iconify/json`,
+				);
 
 				let totalProcessedSets = 0;
 				let totalProcessedIcons = 0;
 
 				for (const iconSet of prefixes) {
 					try {
-						const includeFullSet = forceIncludeSets && includeSets.includes(iconSet);
+						const includeFullSet =
+							forceIncludeSets && includeSets.includes(iconSet);
 
 						const hasUsedIcons = hasIconsWithPrefix(usedIcons, iconSet);
 
@@ -115,11 +126,13 @@ export const pluginIconify = (options: IconifyPluginOptions = {}) => {
 
 						const jsonPath = locate(iconSet);
 						if (!jsonPath) {
-							console.warn(`[iconify] Icon set ${iconSet} not found. Skipping.`);
+							console.warn(
+								`[iconify] Icon set ${iconSet} not found. Skipping.`,
+							);
 							continue;
 						}
 
-						const iconSetData = JSON.parse(fs.readFileSync(jsonPath, 'utf8'));
+						const iconSetData = JSON.parse(fs.readFileSync(jsonPath, "utf8"));
 						let setProcessedIcons = 0;
 
 						const iconNames = Object.keys(iconSetData.icons);
@@ -131,14 +144,20 @@ export const pluginIconify = (options: IconifyPluginOptions = {}) => {
 							const fullIconName = `${iconSet}--${iconName}`;
 							const cssIconName = `icon-[${iconSet}--${iconName}]`;
 
-							if (!includeFullSet && !usedIcons.has(cssIconName) && !usedIcons.has(fullIconName)) {
+							if (
+								!includeFullSet &&
+								!usedIcons.has(cssIconName) &&
+								!usedIcons.has(fullIconName)
+							) {
 								continue;
 							}
 
 							const iconData = getIconData(iconSetData, iconName);
 							if (!iconData) continue;
 
-							const { attributes, body } = iconToSVG(iconData, { height: 'auto' });
+							const { attributes, body } = iconToSVG(iconData, {
+								height: "auto",
+							});
 							let svg = iconToHTML(body, attributes);
 
 							svg = optimizeSVG(svg);
@@ -161,14 +180,16 @@ export const pluginIconify = (options: IconifyPluginOptions = {}) => {
 
 							if (totalProcessedIcons >= maxTotalIcons) {
 								console.warn(
-									`[iconify] Icon limit (${maxTotalIcons}) reached. Other icons will be skipped.`
+									`[iconify] Icon limit (${maxTotalIcons}) reached. Other icons will be skipped.`,
 								);
 								break;
 							}
 						}
 
 						if (setProcessedIcons > 0) {
-							console.log(`[iconify] Processed icon set ${iconSet}: ${setProcessedIcons} icons`);
+							console.log(
+								`[iconify] Processed icon set ${iconSet}: ${setProcessedIcons} icons`,
+							);
 							totalProcessedSets++;
 						}
 
@@ -176,20 +197,26 @@ export const pluginIconify = (options: IconifyPluginOptions = {}) => {
 							break;
 						}
 					} catch (error) {
-						console.error(`[iconify] Error processing icon set ${iconSet}:`, error);
+						console.error(
+							`[iconify] Error processing icon set ${iconSet}:`,
+							error,
+						);
 					}
 				}
 
 				console.log(
-					`[iconify] Total: processed ${totalProcessedIcons} icons from ${totalProcessedSets} sets`
+					`[iconify] Total: processed ${totalProcessedIcons} icons from ${totalProcessedSets} sets`,
 				);
 
-				const rawCSSFile = path.join(targetDir, 'generated-icons.css');
+				const rawCSSFile = path.join(targetDir, "generated-icons.css");
 				fs.writeFileSync(rawCSSFile, iconCSS);
 				console.log(`[iconify] CSS file with icons saved in ${rawCSSFile}`);
 
 				if (compress) {
-					const optimizedCSSFile = path.join(targetDir, 'generated-icons.min.css');
+					const optimizedCSSFile = path.join(
+						targetDir,
+						"generated-icons.min.css",
+					);
 					await compressCSS(rawCSSFile, optimizedCSSFile);
 					fs.copyFileSync(optimizedCSSFile, rawCSSFile);
 					fs.unlinkSync(optimizedCSSFile);

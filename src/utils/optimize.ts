@@ -1,11 +1,11 @@
-import { optimize } from 'svgo';
+import { optimize } from "svgo";
 
 export function optimizeSVG(svgString: string): string {
 	try {
 		const result = optimize(svgString, {
 			plugins: [
 				{
-					name: 'preset-default',
+					name: "preset-default",
 					params: {
 						overrides: {
 							removeViewBox: false,
@@ -14,19 +14,19 @@ export function optimizeSVG(svgString: string): string {
 						},
 					},
 				},
-				'removeXMLNS',
-				{ name: 'collapseGroups' },
-				{ name: 'removeEmptyAttrs' },
-				{ name: 'removeEmptyContainers' },
-				{ name: 'mergePaths' },
-				{ name: 'convertPathData' },
-				{ name: 'cleanupNumericValues' },
-				{ name: 'sortAttrs' },
+				"removeXMLNS",
+				{ name: "collapseGroups" },
+				{ name: "removeEmptyAttrs" },
+				{ name: "removeEmptyContainers" },
+				{ name: "mergePaths" },
+				{ name: "convertPathData" },
+				{ name: "cleanupNumericValues" },
+				{ name: "sortAttrs" },
 			],
 		});
 		return result.data;
 	} catch (error) {
-		console.warn('[iconify] Error optimizing SVG:', error);
+		console.warn("[iconify] Error optimizing SVG:", error);
 		return svgString;
 	}
 }
