@@ -38,6 +38,7 @@
 		"@rslib/core": "^0.9.x"
 	},
 	"devDependencies": {
+		"@biomejs/biome": "^2.1.2",
 		"@types/node": "^20.x",
 		"typescript": "^5.x"
 	},
