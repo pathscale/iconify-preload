@@ -2,6 +2,8 @@ import fs from "node:fs";
 import path from "node:path";
 import { locate, lookupCollections } from "@iconify/json";
 import { getIconData, iconToHTML, iconToSVG } from "@iconify/utils";
+import type { RsbuildPluginAPI } from "@rsbuild/core";
+import type { NarrowedRspackConfig } from "@rsbuild/core/dist-types/types";
 import { compressCSS } from "./utils/compress";
 import { findUsedIcons, hasIconsWithPrefix } from "./utils/find";
 import { optimizeSVG } from "./utils/optimize";
@@ -28,7 +30,7 @@ export const pluginIconify = (options: IconifyPluginOptions = {}) => {
 	return {
 		name: "rsbuild-plugin-iconify",
 
-		setup(api: any) {
+		setup(api: RsbuildPluginAPI) {
 			if (!fs.existsSync(targetDir)) {
 				fs.mkdirSync(targetDir, { recursive: true });
 			}
@@ -38,7 +40,7 @@ export const pluginIconify = (options: IconifyPluginOptions = {}) => {
 				await generateIcons();
 			});
 
-			api.modifyRspackConfig((config: any) => {
+			api.modifyRspackConfig((config: NarrowedRspackConfig) => {
 				if (fs.existsSync(path.join(targetDir, "generated-icons.css"))) {
 					if (!config.entry) {
 						config.entry = {};
