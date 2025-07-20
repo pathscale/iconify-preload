@@ -4,6 +4,12 @@
 	"description": "RSBuild plugin for optimized Iconify SVG icons compilation",
 	"main": "dist/index.js",
 	"types": "dist/index.d.ts",
+	"exports": {
+		".": {
+			"import": "./dist/index.js",
+			"types": "./dist/index.d.ts"
+		}
+	},
 	"scripts": {
 		"build": "bun run build:sources && bun run build:types",
 		"build:sources": "bun build ./src/index.ts --outdir ./dist --target node --format esm --minify --sourcemap=external",
