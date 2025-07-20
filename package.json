@@ -4,9 +4,17 @@
 	"description": "RSBuild plugin for optimized Iconify SVG icons compilation",
 	"main": "dist/index.js",
 	"types": "dist/index.d.ts",
+	"exports": {
+		".": {
+			"import": "./dist/index.js",
+			"types": "./dist/index.d.ts"
+		}
+	},
 	"scripts": {
-		"build": "tsc",
-		"prepublishOnly": "npm run build"
+		"build": "bun run build:sources && bun run build:types",
+		"build:sources": "bun build ./src/index.ts --outdir ./dist --target node --format esm --minify --sourcemap=external",
+		"build:types": "tsc --declaration --emitDeclarationOnly --outDir dist",
+		"prepublishOnly": "bun run build"
 	},
 	"homepage": "https://github.com/pathscale/iconify-preload",
 	"repository": {
@@ -38,8 +46,7 @@
 		"@rslib/core": "^0.9.x"
 	},
 	"devDependencies": {
-		"@types/node": "^20.x",
-		"typescript": "^5.x"
+		"@types/node": "^20.x"
 	},
 	"files": [
 		"dist",
