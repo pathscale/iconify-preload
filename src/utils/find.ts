@@ -69,7 +69,8 @@ export function findUsedIcons(targetDir = "src/styles/icons"): Set<string> {
 
 						for (let i = 0; i < patterns.length; i++) {
 							const pattern = patterns[i];
-							let match;
+							let match: RegExpExecArray | null;
+							// biome-ignore lint/suspicious/noAssignInExpressions: might lead to unexpected behaviour, TODO: think weather it safe or should be fixed
 							while ((match = pattern.exec(content)) !== null) {
 								if (match.length >= 3) {
 									processIcon(match[1], match[2], i, fullPath);
