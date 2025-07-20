@@ -1,11 +1,14 @@
-import fs from 'node:fs';
-import path from 'node:path';
+import fs from "node:fs";
+import path from "node:path";
 
-export function findUsedIcons(targetDir = 'src/styles/icons'): Set<string> {
+export function findUsedIcons(targetDir = "src/styles/icons"): Set<string> {
 	const icons = new Set<string>();
-	const debugInfo: Record<string, { pattern: string, file: string, matches: string[]; }[]> = {};
+	const debugInfo: Record<
+		string,
+		{ pattern: string; file: string; matches: string[] }[]
+	> = {};
 
-	const generatedIconsPath = path.resolve(targetDir, 'generated-icons.css');
+	const generatedIconsPath = path.resolve(targetDir, "generated-icons.css");
 
 	const patterns = [
 		/icon-\[([\w-]+)--([^\]]+)\]/g,
@@ -21,7 +24,12 @@ export function findUsedIcons(targetDir = 'src/styles/icons'): Set<string> {
 		/"icon-\[([\w-]+)--([^\]]+)\]"/g,
 	];
 
-	function processIcon(prefix: string, name: string, patternIdx: number, file: string) {
+	function processIcon(
+		prefix: string,
+		name: string,
+		patternIdx: number,
+		file: string,
+	) {
 		const fullIconName = `${prefix}--${name}`;
 		const cssIconName = `icon-[${prefix}--${name}]`;
 
@@ -31,7 +39,7 @@ export function findUsedIcons(targetDir = 'src/styles/icons'): Set<string> {
 		debugInfo[prefix].push({
 			pattern: patterns[patternIdx].toString(),
 			file,
-			matches: [fullIconName, cssIconName]
+			matches: [fullIconName, cssIconName],
 		});
 
 		icons.add(cssIconName);
@@ -51,13 +59,13 @@ export function findUsedIcons(targetDir = 'src/styles/icons'): Set<string> {
 				}
 
 				if (file.isDirectory()) {
-					if (file.name === 'node_modules' || file.name === 'dist') {
+					if (file.name === "node_modules" || file.name === "dist") {
 						continue;
 					}
 					searchInDirectory(fullPath);
 				} else if (/\.(jsx?|tsx?|css|scss)$/.test(file.name)) {
 					try {
-						const content = fs.readFileSync(fullPath, 'utf8');
+						const content = fs.readFileSync(fullPath, "utf8");
 
 						for (let i = 0; i < patterns.length; i++) {
 							const pattern = patterns[i];
@@ -65,8 +73,7 @@ export function findUsedIcons(targetDir = 'src/styles/icons'): Set<string> {
 							while ((match = pattern.exec(content)) !== null) {
 								if (match.length >= 3) {
 									processIcon(match[1], match[2], i, fullPath);
-								}
-								else if (match.length >= 2) {
+								} else if (match.length >= 2) {
 									const fullMatch = match[1];
 									const parts = fullMatch.match(/([\w-]+)--([\w-]+)/);
 									if (parts && parts.length >= 3) {
@@ -81,7 +88,7 @@ export function findUsedIcons(targetDir = 'src/styles/icons'): Set<string> {
 										debugInfo[prefix].push({
 											pattern: pattern.toString(),
 											file: fullPath,
-											matches: [fullMatch]
+											matches: [fullMatch],
 										});
 									}
 								}
@@ -98,11 +105,11 @@ export function findUsedIcons(targetDir = 'src/styles/icons'): Set<string> {
 		}
 	}
 
-	if (fs.existsSync('src')) {
-		searchInDirectory('src');
+	if (fs.existsSync("src")) {
+		searchInDirectory("src");
 	}
 
-	console.log('[iconify] Debug info for icon sets:');
+	console.log("[iconify] Debug info for icon sets:");
 	for (const [prefix, matches] of Object.entries(debugInfo)) {
 		console.log(`[iconify] Set ${prefix} found in ${matches.length} places`);
 
@@ -110,14 +117,17 @@ export function findUsedIcons(targetDir = 'src/styles/icons'): Set<string> {
 		for (const example of examples) {
 			console.log(`[iconify]   - File: ${example.file}`);
 			console.log(`[iconify]     Pattern: ${example.pattern}`);
-			console.log(`[iconify]     Matches: ${example.matches.join(', ')}`);
+			console.log(`[iconify]     Matches: ${example.matches.join(", ")}`);
 		}
 	}
 
 	return icons;
 }
 
-export function hasIconsWithPrefix(icons: Set<string>, prefix: string): boolean {
+export function hasIconsWithPrefix(
+	icons: Set<string>,
+	prefix: string,
+): boolean {
 	for (const icon of icons) {
 		if (icon.includes(`${prefix}--`) || icon.includes(`${prefix}-`)) {
 			return true;

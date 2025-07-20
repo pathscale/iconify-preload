@@ -1,8 +1,11 @@
-import { exec } from 'node:child_process';
-import fs from 'node:fs';
-import { resolveTaskRunnerCommand } from './resolve-task-runner-command';
+import { exec } from "node:child_process";
+import fs from "node:fs";
+import { resolveTaskRunnerCommand } from "./resolve-task-runner-command";
 
-export function compressCSS(inputFile: string, outputFile: string): Promise<void> {
+export function compressCSS(
+	inputFile: string,
+	outputFile: string,
+): Promise<void> {
 	return new Promise(async (resolve, reject) => {
 		const taskRunner = await resolveTaskRunnerCommand();
 		exec(
@@ -22,10 +25,10 @@ export function compressCSS(inputFile: string, outputFile: string): Promise<void
 				console.log(
 					`[iconify] CSS compressed: ${(originalSize / 1024).toFixed(2)} KB -> ${(
 						compressedSize / 1024
-					).toFixed(2)} KB (saved ${savings}%)`
+					).toFixed(2)} KB (saved ${savings}%)`,
 				);
 				resolve();
-			}
+			},
 		);
 	});
 }
