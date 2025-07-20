@@ -38,8 +38,7 @@
 		"@rslib/core": "^0.9.x"
 	},
 	"devDependencies": {
-		"@types/node": "^20.x",
-		"typescript": "^5.x"
+		"@types/node": "^20.x"
 	},
 	"files": [
 		"dist",
