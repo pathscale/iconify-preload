@@ -3,7 +3,7 @@ import path from 'node:path';
 
 export function findUsedIcons(targetDir = 'src/styles/icons'): Set<string> {
 	const icons = new Set<string>();
-	const debugInfo: Record<string, { pattern: string, file: string, matches: string[]; }[]> = {};
+	const debugInfo: Record<string, { pattern: string; file: string; matches: string[] }[]> = {};
 
 	const generatedIconsPath = path.resolve(targetDir, 'generated-icons.css');
 
@@ -31,7 +31,7 @@ export function findUsedIcons(targetDir = 'src/styles/icons'): Set<string> {
 		debugInfo[prefix].push({
 			pattern: patterns[patternIdx].toString(),
 			file,
-			matches: [fullIconName, cssIconName]
+			matches: [fullIconName, cssIconName],
 		});
 
 		icons.add(cssIconName);
@@ -61,12 +61,12 @@ export function findUsedIcons(targetDir = 'src/styles/icons'): Set<string> {
 
 						for (let i = 0; i < patterns.length; i++) {
 							const pattern = patterns[i];
-							let match;
+							let match: RegExpExecArray | null = null;
+							// biome-ignore lint/suspicious/noAssignInExpressions: old school
 							while ((match = pattern.exec(content)) !== null) {
 								if (match.length >= 3) {
 									processIcon(match[1], match[2], i, fullPath);
-								}
-								else if (match.length >= 2) {
+								} else if (match.length >= 2) {
 									const fullMatch = match[1];
 									const parts = fullMatch.match(/([\w-]+)--([\w-]+)/);
 									if (parts && parts.length >= 3) {
@@ -74,14 +74,14 @@ export function findUsedIcons(targetDir = 'src/styles/icons'): Set<string> {
 									} else {
 										icons.add(fullMatch);
 
-										const prefix = "unknown";
+										const prefix = 'unknown';
 										if (!debugInfo[prefix]) {
 											debugInfo[prefix] = [];
 										}
 										debugInfo[prefix].push({
 											pattern: pattern.toString(),
 											file: fullPath,
-											matches: [fullMatch]
+											matches: [fullMatch],
 										});
 									}
 								}

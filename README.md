@@ -13,11 +13,11 @@ A RSBuild plugin that automatically generates optimized CSS with embedded SVG ic
 ## Installation
 
 ```bash
-npm install rsbuild-plugin-iconify --save-dev
+npm install @pathscale/rsbuild-plugin-iconify --save-dev
 # or
-yarn add rsbuild-plugin-iconify -D
+yarn add @pathscale/rsbuild-plugin-iconify -D
 # or
-bun add -D rsbuild-plugin-iconify
+bun add -D @pathscale/rsbuild-plugin-iconify
 ```
 
 ## Usage
@@ -26,7 +26,7 @@ Add the plugin to your RSBuild configuration:
 
 ```js
 // rsbuild.config.js
-import { pluginIconify } from 'rsbuild-plugin-iconify'
+import { pluginIconify } from '@pathscale/rsbuild-plugin-iconify'
 
 export default {
 	plugins: [

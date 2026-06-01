@@ -1,5 +1,6 @@
 import { locate, lookupCollections } from '@iconify/json';
 import { getIconData, iconToHTML, iconToSVG } from '@iconify/utils';
+import type { RsbuildPlugin } from '@rsbuild/core';
 import fs from 'node:fs';
 import path from 'node:path';
 import { compressCSS } from './utils/compress';
@@ -15,7 +16,7 @@ interface IconifyPluginOptions {
 	compress?: boolean;
 }
 
-export const pluginIconify = (options: IconifyPluginOptions = {}) => {
+export const pluginIconify = (options: IconifyPluginOptions = {}): RsbuildPlugin => {
 	const {
 		targetDir = 'src/styles/icons',
 		includeSets = ['mdi-light', 'material-symbols'],
@@ -28,7 +29,7 @@ export const pluginIconify = (options: IconifyPluginOptions = {}) => {
 	return {
 		name: 'rsbuild-plugin-iconify',
 
-		setup(api: any) {
+		setup(api) {
 			if (!fs.existsSync(targetDir)) {
 				fs.mkdirSync(targetDir, { recursive: true });
 			}
@@ -38,7 +39,7 @@ export const pluginIconify = (options: IconifyPluginOptions = {}) => {
 				await generateIcons();
 			});
 
-			api.modifyRspackConfig((config: any) => {
+			api.modifyRspackConfig((config) => {
 				if (fs.existsSync(path.join(targetDir, 'generated-icons.css'))) {
 					if (!config.entry) {
 						config.entry = {};
@@ -123,9 +124,7 @@ export const pluginIconify = (options: IconifyPluginOptions = {}) => {
 						let setProcessedIcons = 0;
 
 						const iconNames = Object.keys(iconSetData.icons);
-						const iconsToProcess = includeFullSet
-							? iconNames.slice(0, maxIconsPerSet)
-							: iconNames;
+						const iconsToProcess = includeFullSet ? iconNames.slice(0, maxIconsPerSet) : iconNames;
 
 						for (const iconName of iconsToProcess) {
 							const fullIconName = `${iconSet}--${iconName}`;
@@ -160,9 +159,7 @@ export const pluginIconify = (options: IconifyPluginOptions = {}) => {
 							totalProcessedIcons++;
 
 							if (totalProcessedIcons >= maxTotalIcons) {
-								console.warn(
-									`[iconify] Icon limit (${maxTotalIcons}) reached. Other icons will be skipped.`
-								);
+								console.warn(`[iconify] Icon limit (${maxTotalIcons}) reached. Other icons will be skipped.`);
 								break;
 							}
 						}
@@ -180,9 +177,7 @@ export const pluginIconify = (options: IconifyPluginOptions = {}) => {
 					}
 				}
 
-				console.log(
-					`[iconify] Total: processed ${totalProcessedIcons} icons from ${totalProcessedSets} sets`
-				);
+				console.log(`[iconify] Total: processed ${totalProcessedIcons} icons from ${totalProcessedSets} sets`);
 
 				const rawCSSFile = path.join(targetDir, 'generated-icons.css');
 				fs.writeFileSync(rawCSSFile, iconCSS);

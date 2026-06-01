@@ -1,31 +1,22 @@
 import { exec } from 'node:child_process';
-import fs from 'node:fs';
+import { stat } from 'node:fs/promises';
+import { promisify } from 'node:util';
 import { resolveTaskRunnerCommand } from './resolve-task-runner-command';
 
-export function compressCSS(inputFile: string, outputFile: string): Promise<void> {
-	return new Promise(async (resolve, reject) => {
-		const taskRunner = await resolveTaskRunnerCommand();
-		exec(
-			`${taskRunner} postcss ${inputFile} --use cssnano --no-map -o ${outputFile}`,
-			(error, stdout, stderr) => {
-				if (error) {
-					console.error(`[iconify] Error compressing CSS: ${error.message}`);
-					reject(error);
-					return;
-				}
-				if (stderr) {
-					console.error(`[iconify] stderr: ${stderr}`);
-				}
-				const originalSize = fs.statSync(inputFile).size;
-				const compressedSize = fs.statSync(outputFile).size;
-				const savings = ((1 - compressedSize / originalSize) * 100).toFixed(2);
-				console.log(
-					`[iconify] CSS compressed: ${(originalSize / 1024).toFixed(2)} KB -> ${(
-						compressedSize / 1024
-					).toFixed(2)} KB (saved ${savings}%)`
-				);
-				resolve();
-			}
-		);
-	});
+const execAsync = promisify(exec);
+export async function compressCSS(inputFile: string, outputFile: string): Promise<void> {
+	const taskRunner = await resolveTaskRunnerCommand();
+	const command = `${taskRunner} postcss ${inputFile} --use cssnano --no-map -o ${outputFile}`;
+	try {
+		const { stderr } = await execAsync(command);
+		if (stderr) console.error(`[iconify] stderr: ${stderr}`);
+		const originalSize = await stat(inputFile).then((s) => s.size);
+		const compressedSize = await stat(outputFile).then((s) => s.size);
+		const savings = ((1 - compressedSize / originalSize) * 100).toFixed(2);
+		console.log(`[iconify] CSS compressed: ${(originalSize / 1024).toFixed(2)} KB -> ${(compressedSize / 1024).toFixed(2)} KB (saved ${savings}%)`);
+	} catch (error) {
+		const err = error instanceof Error ? error : new Error(String(error));
+		console.error(`[iconify] Error compressing CSS: ${err.message}`);
+		throw err;
+	}
 }
