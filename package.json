@@ -9,6 +9,9 @@
 		"prepublishOnly": "npm run build"
 	},
 	"homepage": "https://github.com/pathscale/iconify-preload",
+	"bugs": {
+		"url": "https://github.com/pathscale/iconify-preload/issues"
+	},
 	"repository": {
 		"type": "git",
 		"url": "https://github.com/pathscale/iconify-preload.git"
