@@ -38,8 +38,7 @@ docs/plans/
 review/
 
 # AI tools
-CLAUDE.md
-.claude/
+/.claude/settings.local.json
 .cursorrules
 .cursor/
 .github/copilot-instructions.md
